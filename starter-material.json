@@ -1,0 +1,85 @@
+{
+  "id": "sample-small-promises",
+  "title": "A small promise, kept imperfectly",
+  "subtitle": "不完美地兑现一个小承诺",
+  "topic": "个人成长",
+  "sourceNote": "原创虚构故事，用于英语练习；不作为心理学研究结论。",
+  "prompt": "用 30—60 秒复述 Mia 做了什么改变。再说出你愿意试一周的小改变，使用至少两个新表达。",
+  "paragraphs": [
+    {
+      "text": "On Monday morning, Mia opened her laptop and found twelve messages waiting for her. None of them said anything dramatic. One colleague wanted a quick opinion. Another asked whether she could join a meeting. Mia answered every request before looking at her own plans. By ten, she had worked hard without starting the one task she cared about. She decided to take a step back, close the chat window, and ask a simple question: whose priorities was she following?",
+      "zh": "周一上午，Mia 打开电脑，看到了十二条消息。没有什么惊天动地的事：同事想听听意见，有人邀请她开会。她还没看自己的计划，就回应了所有请求。到了十点，她忙了很久，却还没开始自己重视的任务。她决定先退一步，关掉聊天窗口，问自己：我在按谁的优先级做事？",
+      "annotations": [
+        {
+          "text": "take a step back",
+          "term": "take a step back",
+          "meaning": "退一步，重新审视",
+          "type": "口语搭配",
+          "context": "周一上午，Mia 打开电脑，看到了十二条消息。没有什么惊天动地的事：同事想听听意见，有人邀请她开会。她还没看自己的计划，就回应了所有请求。到了十点，她忙了很久，却还没开始自己重视的任务。她决定先退一步，关掉聊天窗口，问自己：我在按谁的优先级做事？",
+          "example": "When a conversation gets tense, I try to take a step back.",
+          "usage": "尝试用这个表达描述你自己的学习或生活安排。"
+        }
+      ]
+    },
+    {
+      "text": "At lunch, she told her friend Leo that she needed a completely new routine. Leo laughed. Last month, his completely new routine had lasted until Tuesday. He had planned to get up early, exercise, read, and cook breakfast before work. In practice, he had spent twenty minutes looking for his running shoes. Perhaps, he suggested, they could start small. Mia chose one change: before opening her messages, she would write down the next useful action on her main task.",
+      "zh": "午饭时，她告诉朋友 Leo，自己需要一套全新作息。Leo 笑了：他上个月的全新作息，只坚持到周二。他本打算早起、运动、阅读、做早餐，结果光找跑鞋就花了二十分钟。他建议，不如从小事开始。Mia 只选了一项改变：打开消息前，先写下主要任务的下一步。",
+      "annotations": [
+        {
+          "text": "start small",
+          "term": "start small",
+          "meaning": "从小事做起",
+          "type": "口语搭配",
+          "context": "午饭时，她告诉朋友 Leo，自己需要一套全新作息。Leo 笑了：他上个月的全新作息，只坚持到周二。他本打算早起、运动、阅读、做早餐，结果光找跑鞋就花了二十分钟。他建议，不如从小事开始。Mia 只选了一项改变：打开消息前，先写下主要任务的下一步。",
+          "example": "You do not need a perfect plan. Start small.",
+          "usage": "尝试用这个表达描述你自己的学习或生活安排。"
+        }
+      ]
+    },
+    {
+      "text": "The next morning did not go smoothly. A notification appeared while Mia was making tea, and she reached for her phone without thinking. She noticed the movement and put it down. There was no need to turn that moment into a story about being lazy. She could simply pick up where she left off. Her next useful action was modest: write a rough opening paragraph. It would not impress anyone, but it would give her something real to improve.",
+      "zh": "第二天并不顺利。泡茶时，一条通知出现，她下意识伸手拿手机。注意到这个动作后，她把手机放下。没必要把这一刻解读成“我太懒了”。她可以从刚才停下的地方继续。下一步很小：写一个粗糙的开头。它不会惊艳别人，但至少提供了可以修改的内容。",
+      "annotations": [
+        {
+          "text": "pick up where she left off",
+          "term": "pick up where she left off",
+          "meaning": "从停下的地方继续",
+          "type": "口语搭配",
+          "context": "第二天并不顺利。泡茶时，一条通知出现，她下意识伸手拿手机。注意到这个动作后，她把手机放下。没必要把这一刻解读成“我太懒了”。她可以从刚才停下的地方继续。下一步很小：写一个粗糙的开头。它不会惊艳别人，但至少提供了可以修改的内容。",
+          "example": "After lunch, I will pick up where I left off.",
+          "usage": "尝试用这个表达描述你自己的学习或生活安排。"
+        }
+      ]
+    },
+    {
+      "text": "By Thursday, Mia was tempted to raise the bar. One paragraph felt too easy. Why not demand three pages? Then she remembered how often a difficult day had put her off starting altogether. She kept the small promise and allowed herself to do more when she had time. On a busy morning, the paragraph was enough. On a quiet afternoon, it led to another. She was learning to tell the difference between a useful challenge and a rule that made her avoid the work.",
+      "zh": "到了周四，Mia 想提高标准：一段是不是太容易了，为什么不要求写三页？但她想到，困难的日子常常让她干脆不愿开始。于是她保留小承诺，有时间再多做。忙碌的早晨写一段就够，安静的下午再接一段。她在学习区分：有帮助的挑战，与让人逃避的规定。",
+      "annotations": [
+        {
+          "text": "raise the bar",
+          "term": "raise the bar",
+          "meaning": "提高标准",
+          "type": "口语搭配",
+          "context": "到了周四，Mia 想提高标准：一段是不是太容易了，为什么不要求写三页？但她想到，困难的日子常常让她干脆不愿开始。于是她保留小承诺，有时间再多做。忙碌的早晨写一段就够，安静的下午再接一段。她在学习区分：有帮助的挑战，与让人逃避的规定。",
+          "example": "I want to improve, but I do not need to raise the bar every day.",
+          "usage": "尝试用这个表达描述你自己的学习或生活安排。"
+        }
+      ]
+    },
+    {
+      "text": "On Friday, Leo asked whether the experiment had changed her life. Mia said no, which seemed to disappoint him. Her inbox was still full, and she still got distracted. But she had made progress on something she had been avoiding. More importantly, she could explain what helped her begin. They agreed to give it another week. Leo would try leaving his running shoes by the door. Mia would keep her notebook beside the kettle. Neither plan sounded impressive. Both sounded possible.",
+      "zh": "周五，Leo 问这个实验有没有改变人生。Mia 说没有，Leo 似乎有些失望。收件箱依然满，她依然分心。但她一直逃避的事情有了进展，更重要的是，她知道什么能帮自己开始。他们决定再试一周。Leo 把跑鞋放在门边，Mia 把笔记本放在水壶旁。计划都不惊艳，但都做得到。",
+      "annotations": [
+        {
+          "text": "give it another week",
+          "term": "give it another week",
+          "meaning": "再给它一周时间",
+          "type": "口语搭配",
+          "context": "周五，Leo 问这个实验有没有改变人生。Mia 说没有，Leo 似乎有些失望。收件箱依然满，她依然分心。但她一直逃避的事情有了进展，更重要的是，她知道什么能帮自己开始。他们决定再试一周。Leo 把跑鞋放在门边，Mia 把笔记本放在水壶旁。计划都不惊艳，但都做得到。",
+          "example": "It is too early to decide. Let us give it another week.",
+          "usage": "尝试用这个表达描述你自己的学习或生活安排。"
+        }
+      ]
+    }
+  ]
+}

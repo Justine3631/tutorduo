@@ -1,0 +1,12 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {validateMaterial,validateBackup,expressionKey,segments,parseSubtitles,reviewPrompt} from './core.mjs';
+const a={text:'think it through',term:'think it through',meaning:'想清楚'};
+const m={id:'m1',title:'Test',paragraphs:[{text:'Please think it through.',annotations:[a]}]};
+test('reject broken annotations before import',()=>{assert.throws(()=>validateMaterial({...m,paragraphs:[{text:'hello',annotations:[a]}]}));assert.throws(()=>validateMaterial({title:'a',paragraphs:[]}));});
+test('same term different senses stay separate',()=>{assert.notEqual(expressionKey(a),expressionKey({...a,meaning:'另一种含义'}));});
+test('overlapping phrases preserve complete original text',()=>{const text='think it through, think it through';const chunks=segments(text,[a,{text:'think',meaning:'想'}]);assert.equal(chunks.map(c=>c.text).join(''),text);assert.equal(chunks.filter(c=>c.annotation).length,2);});
+test('SRT and VTT timestamps are retained',()=>{for(const sep of [',','.']){const result=parseSubtitles(`1\n00:01:02${sep}500 --> 00:01:04${sep}000\nHello there.\n`,'test');assert.equal(result.paragraphs[0].start,62.5);}});
+test('PASS and reason persist through JSON backup round trip',()=>{const state={version:1,materials:[m],current:'m1',words:[{annotation:a,status:'passed',reason:'sound',sentence:'Please think it through.'}]};const copy=validateBackup(JSON.parse(JSON.stringify(state)));assert.equal(copy.words[0].status,'passed');assert.equal(copy.words[0].reason,'sound');assert.equal(copy.words[0].key,expressionKey(a));assert.throws(()=>validateBackup({...state,words:[{annotation:a,status:'invalid'}]}));});
+test('REPRASE enforces count and retains target senses',()=>{assert.throws(()=>reviewPrompt([]));assert.throws(()=>reviewPrompt(Array(21).fill({annotation:a})));assert.match(reviewPrompt([{annotation:a}]),/想清楚/);});
+test('untrusted markup remains literal text in import model',()=>{assert.equal(validateMaterial({title:'<img onerror=alert(1)>',paragraphs:[{text:'<script>oops</script>'}]}).paragraphs[0].text,'<script>oops</script>');});

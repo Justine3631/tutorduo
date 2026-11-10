@@ -1,0 +1,5 @@
+export const definitions = {
+  'thought it through': { term: 'think it through', type: '口语搭配', form: '原文：thought it through · 过去式', meaning: '把一件事想清楚，再做决定', context: '你已经答应了帮忙，事后希望自己当时多想一会儿。', example: '“Can I have a day to think it through?”', zh: '能给我一天时间想清楚吗？', tip: 'through 可以联想到“从头走到尾”：把问题的不同方面想一遍。这是联想记忆，不是词源解释。' },
+  'fall into the habit of': { term: 'fall into the habit of', type: '常用搭配', form: '后面接名词或动词 -ing 形式', meaning: '不知不觉养成……的习惯', context: '这里指不知不觉把所有请求都当成急事来处理。', example: '“I fell into the habit of checking my phone at breakfast.”', zh: '我不知不觉养成了吃早饭时看手机的习惯。', tip: '说自己的习惯时可以套用：I’ve fallen into the habit of + doing something。试着换成你自己的例子。' },
+  'long-sentence': { term: 'The more…, the less…', type: '长难句拆解', form: '比较结构 · 越……，越不……', meaning: '你越给自己时间选择，就越不容易把下意识的答应当作真正的决定。', context: '主干：The more often you give yourself a moment to choose / the less likely you are to mistake A for B。', example: '“The more I practice, the less nervous I feel.”', zh: '我练习得越多，就越不紧张。', tip: 'mistake A for B = 把 A 误当成 B。原句的 A 是 an automatic yes；B 是 a decision you actually want to make。' }
+};

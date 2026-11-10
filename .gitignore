@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+.env.*
+.DS_Store
+data/
+audio/
+dictionaries/*.csv
+dictionaries/*.sqlite
+materials/
+mobile-reader/
+*-preview.png
+preview.png
+vocabulary-self-test.png
+*.log
