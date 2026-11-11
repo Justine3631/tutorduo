@@ -1,6 +1,6 @@
 import {sentenceParts} from './reading.mjs';
 import {createShadowPlayer} from './shadow-player.js?v=20261026-reading2';
-import {validateMaterial,validateBackup,expressionKey,segments,parseSubtitles,reviewPrompt,reviewSelection} from './core.mjs?v=20261026-reading10';
+import {validateMaterial,validateBackup,expressionKey,segments,parseSubtitles,reviewPrompt,reviewSelection} from './core.mjs?v=20261111-original1';
 import {definitions} from './sample-definitions.mjs';
 const $=s=>document.querySelector(s);
 const el=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n;};
@@ -42,6 +42,7 @@ function sourceLink(url,start){const href=safeSource(url,start);if(!href)return 
 function renderReading(){const m=material();if(!m){switchView('library');return;}shadowPlayer.update(m);$('h1').textContent=m.title;$('.subtitle').textContent=m.subtitle;$('.eyebrow').textContent=(m.topic||'我的材料')+' / ENGLISH IN CONTEXT';$('.article-meta').textContent=`${m.topic||'英语学习'} · ${m.paragraphs.reduce((n,p)=>n+p.text.split(/\s+/).length,0)} 词 · 六级 / IELTS 6.5 起点`;
  $('.source-note').replaceChildren(el('span',m.sourceNote||'用户导入材料'));const link=sourceLink(m.sourceUrl);if(link)$('.source-note').append(' ',link);
  let practiceBanner=$('#practice-banner');if(!practiceBanner){practiceBanner=el('div',undefined,'practice-banner');practiceBanner.id='practice-banner';$('.reading').prepend(practiceBanner);}practiceBanner.replaceChildren();practiceBanner.hidden=m.id!==state.temporary?.id;if(!practiceBanner.hidden){practiceBanner.append(el('span','最近一次 REPHRASE · 已保存在本机'),button('保存副本到材料库',async()=>{const copy=validateMaterial({...m,id:crypto.randomUUID()});state.materials.push(copy);await save();renderReading();notify('已保存到材料库。');}));}
+ updateAudioSource(m);
  const article=$('article');article.replaceChildren();let sentenceNumber=0;
  m.paragraphs.forEach((p,paragraphIndex)=>{
   const wrap=el('section',undefined,'paragraph-block');
@@ -90,10 +91,17 @@ document.addEventListener('mouseup',event=>{if(selectionTools.contains(event.tar
 const memoryDetails=el('details',undefined,'memory-details');memoryDetails.append(el('summary','用法与记忆提示'));$('#tip').before(memoryDetails);memoryDetails.append($('#tip'));
 const closeDefinition=button('关闭释义 ×',()=>$('.detail-column').classList.remove('definition-open'));closeDefinition.className='definition-close';$('.detail-column').prepend(closeDefinition);
 const shadowPlayer=createShadowPlayer($('.voice-controls'),{stopSynthesis:pauseSynthesis,notify});
-let audio=new Audio();let sequence=0,generating=false,queue=[],queueIndex=0,held=false,currentRow=null;
+let audio=new Audio();let sequence=0,generating=false,queue=[],queueIndex=0,held=false,currentRow=null,originalActive=false;
+const audioSource=el('select');audioSource.id='audio-source';audioSource.setAttribute('aria-label','正文音源');
+for(const [value,text]of [['original','视频原声'],['synthesis','合成语音']]){const option=el('option',text);option.value=value;audioSource.append(option);}
+const sourceLabel=el('label','正文音源 ');sourceLabel.append(audioSource);$('.voice-controls').prepend(sourceLabel);let sourceMaterialId=null;
+function updateAudioSource(m){sourceLabel.hidden=!m.originalAudio;if(sourceMaterialId!==m.id){audioSource.value=m.originalAudio?'original':'synthesis';sourceMaterialId=m.id;}$('#voice').closest('label').hidden=useOriginal();}
+function useOriginal(){return !!material()?.originalAudio&&audioSource.value==='original';}
+audioSource.addEventListener('change',()=>{stopAudio();updateAudioSource(material());prepareArticleAudio(material(),true);});
 const speechCache=new Map(),audioBuffers=new Map();let preparationToken=0,preparationKey='',preparationDone=0,preparationTotal=0;
-function bufferedAudio(url){if(!audioBuffers.has(url)){const buffer=new Audio(url);buffer.preload='auto';buffer.load();audioBuffers.set(url,buffer);}return audioBuffers.get(url);}
+function bufferedAudio(url,preload='auto'){if(!audioBuffers.has(url)){const buffer=new Audio(url);buffer.preload=preload;buffer.load();audioBuffers.set(url,buffer);}return audioBuffers.get(url);}
 async function prepareArticleAudio(m,force=false){
+ if(useOriginal()){++preparationToken;preparationKey='';bufferedAudio(m.originalAudio.url,'metadata');$('#cache-status').textContent='原声单轨 · 按句定位';return;}
  const voice=$('#voice').value,key=m.id+'|'+voice;
  if(!force&&preparationKey===key)return;
  preparationKey=key;const token=++preparationToken;const texts=m.paragraphs.flatMap(p=>sentenceParts(p.text).map(s=>s.text.trim()));let next=0;preparationDone=0;preparationTotal=texts.length;$('#cache-status').textContent=`正在准备 0/${preparationTotal}`;let failed=0;
@@ -113,11 +121,28 @@ function speechURL(text,voice){
 function audioUI(){
  $('#read').textContent='▶ 整篇朗读';
  $('#stop').textContent=held?'▶ 继续':'Ⅱ 暂停';$('#stop').disabled=!queue.length;
- $('#audio-status').textContent=held&&queue.length?'已暂停':generating?'准备当前句…':queue.length?(currentRow?'正在朗读第 '+currentRow.dataset.number+' 句':'正在朗读'):'';
+ $('#audio-status').textContent=held&&queue.length?'已暂停':generating?(originalActive?'加载原声音轨…':'准备当前句…'):queue.length?(currentRow?(originalActive?'原声第 ':'正在朗读第 ')+currentRow.dataset.number+' 句':'正在朗读'):'';
  document.querySelectorAll('.sentence-row').forEach(row=>row.classList.toggle('is-reading',row===currentRow));
 }
 function pauseSynthesis(){held=true;audio.pause();audioUI();}
-function stopAudio(){shadowPlayer.stop();sequence++;audio.pause();queue=[];generating=false;held=false;currentRow=null;audioUI();}
+function stopAudio(){shadowPlayer.stop();sequence++;audio.pause();audio.ontimeupdate=null;audio.onended=null;audio.onerror=null;originalActive=false;queue=[];generating=false;held=false;currentRow=null;audioUI();}
+async function playOriginal(rows){
+ const m=material(),allRows=[...document.querySelectorAll('.sentence-row')],timings=m.originalAudio.sentences;
+ if(timings.length!==allRows.length||allRows.some((row,i)=>row.dataset.text!==timings[i].text)){notify('原声时间与句子不匹配，请切换合成语音。');return;}
+ stopAudio();const token=sequence;
+ queue=rows.map(row=>({...timings[Number(row.dataset.number)-1],row}));if(!queue.length)return;
+ originalActive=true;generating=true;audio=bufferedAudio(m.originalAudio.url);audio.playbackRate=Number($('#speed').value);currentRow=rows[0];audioUI();
+ const finish=()=>{audio.pause();audio.ontimeupdate=null;queue=[];originalActive=false;currentRow=null;audioUI();};
+ audio.onended=()=>{if(token===sequence)finish();};audio.onerror=()=>{if(token===sequence){stopAudio();notify('原声音轨不可用，请切换“合成语音”；音频文件不包含在文字备份中。');}};
+ try{
+  if(audio.readyState<1)await new Promise((resolve,reject)=>{const cleanup=()=>{clearTimeout(timer);audioTrack.removeEventListener('loadedmetadata',loaded);audioTrack.removeEventListener('error',failed);};const audioTrack=audio,loaded=()=>{cleanup();resolve();},failed=()=>{cleanup();reject(Error('原声音轨加载失败。'));},timer=setTimeout(()=>{cleanup();reject(Error('原声音轨加载超时。'));},15000);audioTrack.addEventListener('loadedmetadata',loaded);audioTrack.addEventListener('error',failed);});
+  if(token!==sequence)return;
+  if(queue.at(-1).end>audio.duration+0.1)throw Error('逐句时间超出原声音轨长度，请检查时间标注。');
+  audio.currentTime=queue[0].start;generating=false;
+  audio.ontimeupdate=()=>{if(token!==sequence)return;const time=audio.currentTime;if(time>=queue.at(-1).end){finish();return;}const item=queue.find(s=>time>=s.start&&time<s.end);const row=item?.row||null;if(row!==currentRow){currentRow=row;audioUI();}};
+  audioUI();if(!held)await audio.play();
+ }catch(error){if(token!==sequence)return;stopAudio();notify(error.message+' 可切换合成语音。');}
+}
 async function playItem(token){
  if(token!==sequence||!queue[queueIndex])return;
  generating=true;currentRow=null;audio.pause();audioUI();
@@ -131,7 +156,7 @@ async function playItem(token){
  }catch(error){if(token!==sequence)return;pauseSynthesis();generating=false;audioUI();notify(error.message||'音频播放失败，点击继续重试。');}
 }
 function startQueue(items){stopAudio();queue=items;queueIndex=0;if(queue.length)playItem(sequence);}
-function playRows(rows){startQueue(rows.map(row=>({text:row.dataset.text,row})));}
+function playRows(rows){if(useOriginal())playOriginal(rows);else startQueue(rows.map(row=>({text:row.dataset.text,row})));}
 function playText(text){startQueue([{text,row:null}]);}
 $('#read').addEventListener('click',()=>playRows([...document.querySelectorAll('.sentence-row')]));
 $('#stop').setAttribute('aria-label','暂停或继续朗读');

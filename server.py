@@ -1,7 +1,7 @@
 """Tutorduo local server. Run: python3 server.py"""
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
-import hashlib, json, subprocess, tempfile, os, sqlite3
+import hashlib, json, subprocess, tempfile, os, sqlite3, re
 from urllib.parse import urlsplit, parse_qs
 from datetime import datetime, timezone
 from state_store import StateStore, Conflict
@@ -14,6 +14,8 @@ class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(ROOT), **kwargs)
     def do_GET(self):
+        if self.path.startswith('/audio/original/'):
+            self.original_audio(); return
         if self.path == '/api/state':
             try: self.respond(200, STORE.read())
             except (OSError, ValueError): self.respond(500, {'error':'本机数据读取失败。请保留文件并检查 data/state.json，勿重新初始化。'})
@@ -40,6 +42,40 @@ class Handler(SimpleHTTPRequestHandler):
             self.send_error(403)
         else:
             super().do_GET()
+
+    def original_audio(self):
+        name=urlsplit(self.path).path.removeprefix('/audio/original/')
+        if not re.fullmatch(r'[a-zA-Z0-9_-]+\.(mp3|m4a|wav)',name):
+            self.send_error(404); return
+        path=ROOT/'audio'/'original'/name
+        try:
+            stream=path.open('rb')
+        except FileNotFoundError:
+            self.send_error(404); return
+        with stream:
+            size=os.fstat(stream.fileno()).st_size
+            start,end=0,size-1
+            partial=self.headers.get('Range')
+            if partial:
+                match=re.fullmatch(r'bytes=(\d*)-(\d*)',partial)
+                if match and (match[1] or match[2]):
+                    start=int(match[1]) if match[1] else max(0,size-int(match[2]))
+                    end=min(size-1,int(match[2])) if match[1] and match[2] else size-1
+                else: start=size
+                if start>end or start>=size:
+                    self.send_response(416);self.send_header('Content-Range',f'bytes */{size}');self.send_header('Content-Length','0');self.end_headers();return
+            self.send_response(206 if partial else 200)
+            self.send_header('Content-Type',{'mp3':'audio/mpeg','m4a':'audio/mp4','wav':'audio/wav'}[path.suffix[1:]])
+            self.send_header('Accept-Ranges','bytes')
+            self.send_header('Content-Length',str(end-start+1))
+            if partial:self.send_header('Content-Range',f'bytes {start}-{end}/{size}')
+            self.end_headers();stream.seek(start);remaining=end-start+1
+            try:
+                while remaining>0:
+                    block=stream.read(min(65536,remaining))
+                    if not block:break
+                    self.wfile.write(block);remaining-=len(block)
+            except (BrokenPipeError,ConnectionResetError):pass
 
     def do_POST(self):
         if self.path in ('/api/state', '/api/materials', '/api/rephrase', '/api/rephrase/status', '/api/practice', '/api/context'):

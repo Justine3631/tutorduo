@@ -49,4 +49,20 @@ class ServerTests(unittest.TestCase):
         self.call('/api/context',{'text':'Try','context':'Try again.','sourceTitle':'Practice'})
         self.assertEqual(self.call('/api/context')['context'],'Try again.')
 
+    def test_original_audio_byte_ranges(self):
+        from pathlib import Path
+        old_root=server.ROOT;server.ROOT=Path(self.tmp.name)
+        self.addCleanup(setattr,server,'ROOT',old_root)
+        directory=server.ROOT/'audio'/'original';directory.mkdir(parents=True)
+        (directory/'test.mp3').write_bytes(b'0123456789')
+        for header,body,content_range in [('bytes=0-1',b'01','bytes 0-1/10'),('bytes=4-',b'456789','bytes 4-9/10'),('bytes=-3',b'789','bytes 7-9/10')]:
+            with urlopen(Request(self.base+'/audio/original/test.mp3',headers={'Range':header})) as response:
+                self.assertEqual(response.status,206);self.assertEqual(response.read(),body);self.assertEqual(response.headers['Content-Range'],content_range)
+        for header in ['bytes=10-','bytes=5-2','bytes=-0','bytes=0-1,4-5']:
+            with self.assertRaises(HTTPError) as error:urlopen(Request(self.base+'/audio/original/test.mp3',headers={'Range':header}))
+            self.assertEqual(error.exception.code,416)
+        with self.assertRaises(HTTPError) as error:urlopen(self.base+'/audio/original/../../data/state.json')
+        self.assertEqual(error.exception.code,404)
+        with urlopen(self.base+'/audio/original/test.mp3') as response:self.assertEqual(response.read(),b'0123456789')
+
 if __name__=='__main__' :unittest.main()

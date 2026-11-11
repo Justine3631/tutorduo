@@ -16,7 +16,17 @@ export function validateMaterial(value) {
     if(!Array.isArray(value.clips)||value.clips.length>2000)throw Error('跟读片段列表无效。');
     clipFields={clips:value.clips.map(c=>{if(!c||typeof c.text!=='string'||!c.text.trim()||!Number.isFinite(c.start)||!Number.isFinite(c.end)||c.start<0||c.end<=c.start)throw Error('跟读片段需有正文和有效起止时间。');return {text:c.text,start:c.start,end:c.end};})};
   }
-  return {...clipFields,...(value.archived?{archived:true}:{}),id:str(value.id) || crypto.randomUUID(), title:value.title.trim(), subtitle:str(value.subtitle), topic:str(value.topic), sourceUrl:str(value.sourceUrl), sourceNote:str(value.sourceNote), prompt:str(value.prompt), paragraphs};
+  let originalFields={};
+  if(value.originalAudio!==undefined){
+    const a=value.originalAudio;
+    if(!a||!/^audio\/original\/[a-zA-Z0-9_-]+\.(mp3|m4a|wav)$/.test(a.url)||!Array.isArray(a.sentences)||!a.sentences.length)throw Error('原声音轨路径或逐句时间无效。');
+    let previousEnd=0;
+    const sentences=a.sentences.map(s=>{if(!s||typeof s.text!=='string'||!s.text.trim()||!Number.isFinite(s.start)||!Number.isFinite(s.end)||s.start<previousEnd||s.end<=s.start)throw Error('原声每句需有英文和依次排列的有效起止时间。');previousEnd=s.end;return {text:s.text.trim(),start:s.start,end:s.end};});
+    const normalized=t=>t.trim().replace(/\s+/g,' ');
+    if(normalized(sentences.map(s=>s.text).join(' '))!==normalized(paragraphs.map(p=>p.text).join(' ')))throw Error('原声逐句时间与英文正文不匹配。');
+    originalFields={originalAudio:{url:a.url,sentences}};
+  }
+  return {...clipFields,...originalFields,...(value.archived?{archived:true}:{}),id:str(value.id) || crypto.randomUUID(), title:value.title.trim(), subtitle:str(value.subtitle), topic:str(value.topic), sourceUrl:str(value.sourceUrl), sourceNote:str(value.sourceNote), prompt:str(value.prompt), paragraphs};
 }
 export function expressionKey(a) { return JSON.stringify([(a.term || a.text).toLowerCase().trim(), a.meaning.trim()]); }
 export function segments(text, annotations) {
